@@ -1,0 +1,5 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Acesso não autorizado · LiberaCampus</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body class="error-page"><main class="error-card"><span class="error-code">403</span><h1>Acesso não autorizado.</h1><p th:text="${message}">Sua conta não possui permissão para acessar este recurso.</p><a class="button button-primary" th:href="@{/dashboard}">Voltar ao painel</a></main></body>
+</html>

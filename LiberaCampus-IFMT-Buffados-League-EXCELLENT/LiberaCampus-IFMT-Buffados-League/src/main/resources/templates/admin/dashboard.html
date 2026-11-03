@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Painel administrativo · LiberaCampus</title>
+    <link rel="stylesheet" th:href="@{/webjars/jquery-ui/1.14.2/jquery-ui.min.css}"><link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{fragments/layout :: sidebar('dashboard', ${account})}"></div>
+    <main class="main-area">
+        <div th:replace="~{fragments/layout :: topbar('Painel administrativo', ${account})}"></div>
+        <div class="page-content">
+            <div th:replace="~{fragments/layout :: flashMessages}"></div>
+            <section class="admin-welcome">
+                <div><span class="eyebrow eyebrow-light"><i></i> CENTRAL ADMINISTRATIVA</span><h1>Gestão de petições.<br><em>Com responsabilidade.</em></h1><p>Analise solicitações, registre a manifestação do seu departamento e acompanhe o fluxo de liberação de turmas.</p></div>
+                <div class="admin-welcome-aside"><span>SEU ESCOPO DE ATUAÇÃO</span><div class="admin-dept-tags"><span th:each="department : ${account.assignedDepartments}" th:text="${department}">DCOM</span></div><small>Somente as petições encaminhadas às áreas vinculadas à sua conta aparecem nesta central.</small></div>
+            </section>
+            <section class="metric-grid metric-grid-5">
+                <article class="metric-card"><div class="metric-top"><span>No seu escopo</span><span class="metric-icon">▤</span></div><strong th:text="${total}">0</strong><small>Petições acessíveis</small></article>
+                <article class="metric-card metric-warning"><div class="metric-top"><span>Pendentes</span><span class="metric-icon">◷</span></div><strong th:text="${pending}">0</strong><small>Aguardando início da análise</small></article>
+                <article class="metric-card metric-info"><div class="metric-top"><span>Em análise</span><span class="metric-icon">⌕</span></div><strong th:text="${inAnalysis}">0</strong><small>Com tramitação iniciada</small></article>
+                <article class="metric-card metric-success"><div class="metric-top"><span>Aprovadas</span><span class="metric-icon">✓</span></div><strong th:text="${approved}">0</strong><small>Todos os departamentos favoráveis</small></article>
+                <article class="metric-card metric-danger"><div class="metric-top"><span>Indeferidas</span><span class="metric-icon">×</span></div><strong th:text="${rejected}">0</strong><small>Com manifestação desfavorável</small></article>
+            </section>
+
+            <section class="content-grid content-grid-admin">
+                <article class="surface-card">
+                    <div class="section-heading"><div><span class="eyebrow">FILA DE TRAMITAÇÃO</span><h2>Petições recentes</h2><p>Solicitações encaminhadas aos departamentos sob sua responsabilidade.</p></div><a class="text-link" th:href="@{/admin/peticoes}">Abrir fila completa →</a></div>
+                    <div class="empty-state" th:if="${#lists.isEmpty(petitions)}"><div class="empty-symbol">⌁</div><strong>Nenhuma petição no seu escopo.</strong><p>Quando uma nova solicitação for encaminhada a seus departamentos, ela aparecerá aqui.</p></div>
+                    <div class="table-scroll" th:if="${!#lists.isEmpty(petitions)}">
+                        <table class="data-table"><thead><tr><th>Protocolo</th><th>Solicitante / turma</th><th>Data solicitada</th><th>Status</th><th></th></tr></thead>
+                            <tbody><tr th:each="petition : ${petitions}">
+                                <td><strong class="protocol-text" th:text="${petition.protocol}">PET</strong><small th:text="${petition.course.label}">Curso</small></td>
+                                <td><strong th:text="${petition.requester.fullName}">Estudante</strong><small th:text="${petition.className}">Turma</small></td>
+                                <td th:text="${#temporals.format(petition.requestedDate, 'dd/MM/yyyy')}">04/11/2026</td>
+                                <td><span th:replace="~{fragments/layout :: statusBadge(${petition.status})}"></span></td>
+                                <td><a class="table-action" th:href="@{/admin/peticoes/{id}(id=${petition.id})}">Analisar →</a></td>
+                            </tr></tbody>
+                        </table>
+                    </div>
+                </article>
+                <aside class="surface-card guidance-card">
+                    <div class="guidance-mark">✓</div><span class="eyebrow">FLUXO DE DECISÃO</span><h3>Uma manifestação clara evita retrabalho.</h3>
+                    <ul class="guidance-list">
+                        <li><span>01</span> Confira turma, data e intervalo de aulas.</li>
+                        <li><span>02</span> Avalie a justificativa e as disciplinas afetadas.</li>
+                        <li><span>03</span> Registre a decisão do seu departamento.</li>
+                        <li><span>04</span> Informe justificativa obrigatória ao indeferir.</li>
+                    </ul>
+                    <div class="notice notice-info">A aprovação geral somente ocorre quando todos os departamentos envolvidos registram manifestação favorável.</div>
+                </aside>
+            </section>
+            <footer class="page-footer"><span><strong>LiberaCampus IFMT</strong> · Central administrativa</span><span>Decisões sujeitas à responsabilidade do administrador autenticado</span></footer>
+        </div>
+    </main>
+</div>
+<div class="sidebar-scrim" data-sidebar-scrim></div>
+<script th:src="@{/webjars/jquery/3.7.1/jquery.min.js}"></script><script th:src="@{/webjars/jquery-ui/1.14.2/jquery-ui.min.js}"></script><script th:src="@{/js/app.js}"></script>
+</body>
+</html>

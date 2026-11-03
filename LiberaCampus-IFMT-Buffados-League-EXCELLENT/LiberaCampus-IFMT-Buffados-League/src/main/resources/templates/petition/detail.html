@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${petition.protocol} + ' · LiberaCampus'">Detalhes da petição</title>
+    <link rel="stylesheet" th:href="@{/webjars/jquery-ui/1.14.2/jquery-ui.min.css}"><link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{fragments/layout :: sidebar(${adminView} ? 'petitions' : 'petitions', ${account})}"></div>
+    <main class="main-area">
+        <div th:replace="~{fragments/layout :: topbar('Detalhes da petição', ${account})}"></div>
+        <div class="page-content">
+            <div th:replace="~{fragments/layout :: flashMessages}"></div>
+            <section class="detail-hero">
+                <div class="detail-hero-top"><a class="back-link back-link-light" th:href="${adminView} ? @{/admin/peticoes} : @{/peticoes}">← Voltar à lista</a><span class="detail-protocol-label">PROTOCOLO OFICIAL DO PORTAL</span></div>
+                <div class="detail-hero-main">
+                    <div><span class="eyebrow eyebrow-light">PETIÇÃO DE LIBERAÇÃO DE TURMA</span><h1 th:text="${petition.protocol}">PET-2026-ABCD1234</h1><p th:text="${petition.className + ' · ' + petition.course.label}">Turma · Curso</p></div>
+                    <span th:replace="~{fragments/layout :: statusBadge(${petition.status})}"></span>
+                </div>
+                <div class="detail-hero-meta"><span>Protocolada em <strong th:text="${#temporals.format(petition.createdAt, 'dd/MM/yyyy HH:mm')}">03/11/2026</strong></span><span>Última atualização <strong th:text="${#temporals.format(petition.updatedAt, 'dd/MM/yyyy HH:mm')}">03/11/2026</strong></span></div>
+            </section>
+
+            <div class="detail-columns">
+                <div class="detail-main-column">
+                    <section class="surface-card detail-card">
+                        <div class="section-heading section-heading-compact"><div><span class="eyebrow">DADOS DA SOLICITAÇÃO</span><h2>Informações da liberação</h2></div></div>
+                        <div class="detail-data-grid">
+                            <div class="detail-data"><small>Solicitante</small><strong th:text="${petition.requester.fullName}">Nome</strong></div>
+                            <div class="detail-data"><small>Matrícula</small><strong th:text="${petition.requester.matricula}">Matrícula</strong></div>
+                            <div class="detail-data"><small>Representação</small><strong th:text="${petition.representativeRole.label}">Líder</strong></div>
+                            <div class="detail-data"><small>Data pretendida</small><strong th:text="${#temporals.format(petition.requestedDate, 'dd/MM/yyyy')}">04/11/2026</strong></div>
+                            <div class="detail-data"><small>Intervalo solicitado</small><strong th:text="${petition.firstPeriod + 'º ao ' + petition.lastPeriod + 'º horário'}">2º ao 4º</strong></div>
+                            <div class="detail-data"><small>Quantidade estimada</small><strong th:text="${petition.expectedStudents} + ' estudantes'">32 estudantes</strong></div>
+                            <div class="detail-data detail-data-wide"><small>Disciplinas / atividades afetadas</small><strong th:text="${petition.affectedSubjects == null || petition.affectedSubjects.isBlank() ? 'Não especificadas' : petition.affectedSubjects}">Disciplinas</strong></div>
+                        </div>
+                        <div class="reason-block"><small>JUSTIFICATIVA APRESENTADA</small><p th:text="${petition.reason}">Justificativa.</p></div>
+                    </section>
+
+                    <section class="surface-card detail-card">
+                        <div class="section-heading section-heading-compact"><div><span class="eyebrow">FLUXO DE TRAMITAÇÃO</span><h2>Departamentos responsáveis</h2><p>A manifestação final de cada área é registrada separadamente.</p></div></div>
+                        <div class="flash flash-error" th:if="${petition.status.name() == 'REJECTED'}">A tramitação foi encerrada após manifestação desfavorável. As demais etapas são exibidas para consulta histórica.</div>
+                        <div class="department-decision-list">
+                            <article class="department-decision" th:each="entry : ${petition.departmentEntries}">
+                                <div class="department-decision-head">
+                                    <div class="department-emblem" th:text="${entry.department.name()}">DCOM</div>
+                                    <div class="department-decision-copy"><strong th:text="${entry.department.getName()}">Departamento de Computação</strong><small th:text="${entry.department.getScope()}">Curso</small></div>
+                                    <span class="decision-state" th:classappend="${' decision-' + entry.status.name().toLowerCase()}" th:text="${entry.status.label}">Aguardando análise</span>
+                                </div>
+                                <div class="department-decision-note" th:if="${entry.decisionNote != null and !entry.decisionNote.isBlank()}"><small>REGISTRO DO DEPARTAMENTO</small><p th:text="${entry.decisionNote}"></p><span th:if="${entry.decidedByName != null}" th:text="${'Registrado por ' + entry.decidedByName}"></span></div>
+                                <form th:if="${adminView and petition.status.name() != 'CANCELLED' and petition.status.name() != 'APPROVED' and petition.status.name() != 'REJECTED' and managedDepartments.contains(entry.department) and entry.status.name() != 'APPROVED' and entry.status.name() != 'REJECTED'}"
+                                      th:action="@{/admin/peticoes/{id}/departamento/{department}(id=${petition.id}, department=${entry.department})}"
+                                      th:object="${decisionForm}" method="post" class="department-action-form">
+                                    <label>Justificativa ou observação <span>(obrigatória para indeferir)</span></label>
+                                    <textarea th:field="*{note}" rows="2" maxlength="1800" placeholder="Registre informações relevantes para a decisão."></textarea>
+                                    <div class="decision-actions">
+                                        <button class="button button-soft" type="submit" name="status" value="IN_ANALYSIS" th:if="${entry.status.name() == 'PENDING'}">Iniciar análise</button>
+                                        <button class="button button-approve" type="submit" name="status" value="APPROVED" data-confirm="Registrar manifestação favorável deste departamento?">Aprovar</button>
+                                        <button class="button button-reject" type="submit" name="status" value="REJECTED" data-confirm="Indeferir esta etapa? A justificativa é obrigatória.">Indeferir</button>
+                                    </div>
+                                </form>
+                                <div class="admin-scope-note" th:if="${adminView and !managedDepartments.contains(entry.department)}">Esta etapa pertence a outro departamento. Sua conta não pode alterá-la.</div>
+                            </article>
+                        </div>
+                    </section>
+
+                    <section class="surface-card detail-card">
+                        <div class="section-heading section-heading-compact"><div><span class="eyebrow">AUDITORIA</span><h2>Histórico de movimentações</h2><p>Registro cronológico das ações realizadas na petição.</p></div></div>
+                        <div class="event-timeline">
+                            <article class="event-item" th:each="event : ${petition.events}">
+                                <span class="event-marker"></span>
+                                <div class="event-content"><div class="event-heading"><strong th:text="${event.title}">Petição protocolada</strong><time th:text="${#temporals.format(event.occurredAt, 'dd/MM/yyyy HH:mm')}">03/11/2026</time></div><p th:text="${event.description}">Descrição</p><small th:text="${'Responsável: ' + event.actorName}">Responsável</small></div>
+                            </article>
+                        </div>
+                    </section>
+                </div>
+
+                <aside class="detail-side-column">
+                    <section class="surface-card side-action-card" th:if="${!adminView}">
+                        <span class="eyebrow">AÇÕES DO SOLICITANTE</span>
+                        <h3>Gerencie seu protocolo.</h3>
+                        <p>Enquanto a petição estiver pendente, você poderá corrigir as informações ou cancelar o pedido.</p>
+                        <a class="button button-secondary button-wide" th:if="${petition.status.name() == 'PENDING'}" th:href="@{/peticoes/{id}/editar(id=${petition.id})}">Editar petição</a>
+                        <form th:if="${petition.status.name() == 'PENDING'}" th:action="@{/peticoes/{id}/cancelar(id=${petition.id})}" method="post">
+                            <button class="button button-danger-outline button-wide" type="submit" data-confirm="Deseja realmente cancelar esta petição?">Cancelar petição</button>
+                        </form>
+                        <div class="locked-note" th:if="${petition.status.name() != 'PENDING'}"><span>⌑</span> Edição bloqueada: a tramitação já foi iniciada ou concluída.</div>
+                    </section>
+                    <section class="surface-card side-action-card" th:if="${adminView}">
+                        <span class="eyebrow">RESPONSABILIDADE ADMINISTRATIVA</span>
+                        <h3>Decisão com rastreabilidade.</h3>
+                        <p>As decisões desta conta ficam vinculadas ao departamento, ao responsável e ao horário da manifestação.</p>
+                        <p class="locked-note" th:if="${petition.status.name() == 'CANCELLED' or petition.status.name() == 'APPROVED' or petition.status.name() == 'REJECTED'}">Processo encerrado: consulta e histórico permanecem disponíveis, sem novas decisões.</p>
+                        <div class="admin-dept-tags"><span th:each="department : ${account.assignedDepartments}" th:text="${department}">DCOM</span></div>
+                    </section>
+                    <section class="surface-card side-info-card">
+                        <span class="eyebrow">REGRA DE CONSOLIDAÇÃO</span>
+                        <h3>Como o status geral é definido?</h3>
+                        <ul>
+                            <li><span class="mini-dot dot-warning"></span><strong>Pendente</strong><small>Nenhum departamento iniciou a análise.</small></li>
+                            <li><span class="mini-dot dot-info"></span><strong>Em análise</strong><small>Há manifestação em andamento ou aprovação parcial.</small></li>
+                            <li><span class="mini-dot dot-success"></span><strong>Aprovada</strong><small>Todos os departamentos envolvidos aprovaram.</small></li>
+                            <li><span class="mini-dot dot-danger"></span><strong>Indeferida</strong><small>Ao menos um departamento registrou indeferimento.</small></li>
+                        </ul>
+                    </section>
+                </aside>
+            </div>
+            <footer class="page-footer"><span><strong>LiberaCampus IFMT</strong> · Consulta de protocolo</span><span>Registro acadêmico e trilha de auditoria</span></footer>
+        </div>
+    </main>
+</div>
+<div class="sidebar-scrim" data-sidebar-scrim></div>
+<script th:src="@{/webjars/jquery/3.7.1/jquery.min.js}"></script><script th:src="@{/webjars/jquery-ui/1.14.2/jquery-ui.min.js}"></script><script th:src="@{/js/app.js}"></script>
+</body>
+</html>

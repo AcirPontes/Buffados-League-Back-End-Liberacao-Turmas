@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#102b27">
+    <title>Entrar · LiberaCampus IFMT</title>
+    <link rel="stylesheet" th:href="@{/webjars/jquery-ui/1.14.2/jquery-ui.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="auth-page">
+<div class="auth-layout">
+    <section class="auth-visual">
+        <div class="auth-brand"><span class="brand-symbol">LC</span><span><strong>LiberaCampus</strong><small>IFMT · Campus Cuiabá</small></span></div>
+        <div class="auth-visual-content">
+            <span class="eyebrow eyebrow-light"><i></i> ORGANIZAÇÃO ACADÊMICA</span>
+            <h1>Uma solicitação.<br><em>Um fluxo claro.</em></h1>
+            <p>Centralize as petições de liberação de turma, acompanhe cada etapa e mantenha as decisões departamentais registradas.</p>
+            <div class="auth-feature-list">
+                <div><span>01</span><p><strong>Protocolo rastreável</strong><small>Identificação e histórico de cada petição.</small></p></div>
+                <div><span>02</span><p><strong>Encaminhamento institucional</strong><small>Fluxo organizado por departamento.</small></p></div>
+                <div><span>03</span><p><strong>Decisão responsável</strong><small>Aprovação restrita às contas administrativas.</small></p></div>
+            </div>
+        </div>
+        <div class="auth-visual-footer">PROJETO ACADÊMICO · BUFFADOS LEAGUE</div>
+    </section>
+
+    <main class="auth-panel">
+        <div class="auth-panel-inner">
+            <div class="mobile-auth-brand"><span class="brand-symbol">LC</span><strong>LiberaCampus</strong></div>
+            <span class="eyebrow">ÁREA RESTRITA</span>
+            <h2>Bem-vindo de volta.</h2>
+            <p class="auth-description">Entre com sua matrícula e a senha cadastrada neste portal.</p>
+
+            <div class="flash flash-success" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="flash flash-error" th:if="${param.erro}">Matrícula ou senha incorreta. Verifique seus dados e tente novamente.</div>
+            <div class="flash flash-success" th:if="${param.saiu}">Você encerrou sua sessão com segurança.</div>
+
+            <form th:action="@{/login}" method="post" class="auth-form">
+                <div class="field-group">
+                    <label for="matricula">Código de matrícula / usuário</label>
+                    <input id="matricula" name="matricula" type="text" autocomplete="username" required autofocus placeholder="Ex.: 202600001">
+                </div>
+                <div class="field-group">
+                    <div class="field-label-row"><label for="password">Senha</label><span class="field-note">Mínimo de 8 caracteres</span></div>
+                    <div class="password-wrap">
+                        <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="Digite sua senha">
+                        <button type="button" class="password-toggle" data-password-toggle="password">Mostrar</button>
+                    </div>
+                </div>
+                <button class="button button-primary button-wide" type="submit">Acessar o portal <span>→</span></button>
+            </form>
+
+            <div class="auth-divider"><span>PRIMEIRO ACESSO</span></div>
+            <a class="button button-secondary button-wide" th:href="@{/cadastro}">Criar conta de estudante</a>
+            <p class="auth-legal">Ao continuar, você confirma que está utilizando este ambiente acadêmico de demonstração. Não informe aqui a senha da sua conta SUAP.</p>
+            <p class="auth-back"><a href="https://cba.ifmt.edu.br/" target="_blank" rel="noopener noreferrer">Portal oficial do Campus Cuiabá ↗</a></p>
+        </div>
+    </main>
+</div>
+<script th:src="@{/webjars/jquery/3.7.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/jquery-ui/1.14.2/jquery-ui.min.js}"></script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

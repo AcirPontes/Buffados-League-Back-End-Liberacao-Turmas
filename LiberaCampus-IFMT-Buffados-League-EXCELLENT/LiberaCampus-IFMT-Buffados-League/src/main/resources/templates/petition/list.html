@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Minhas petições · LiberaCampus</title>
+    <link rel="stylesheet" th:href="@{/webjars/jquery-ui/1.14.2/jquery-ui.min.css}"><link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{fragments/layout :: sidebar('petitions', ${account})}"></div>
+    <main class="main-area">
+        <div th:replace="~{fragments/layout :: topbar('Minhas petições', ${account})}"></div>
+        <div class="page-content">
+            <div th:replace="~{fragments/layout :: flashMessages}"></div>
+            <section class="page-intro page-intro-row">
+                <div><span class="eyebrow">CENTRAL DO ESTUDANTE</span><h1>Minhas petições.</h1><p>Todos os protocolos vinculados à sua matrícula, com status e histórico de movimentações.</p></div>
+                <a class="button button-primary" th:href="@{/peticoes/nova}">＋ Nova petição</a>
+            </section>
+            <section class="surface-card">
+                <div class="section-heading section-heading-compact">
+                    <div><h2>Histórico de solicitações</h2><p th:text="${#lists.size(petitions) + ' registro(s) encontrado(s)'}"></p></div>
+                    <div class="table-tools"><label class="search-field"><span>⌕</span><input type="search" placeholder="Buscar protocolo ou status" data-table-search="petitions-table"></label></div>
+                </div>
+                <div class="empty-state" th:if="${#lists.isEmpty(petitions)}"><div class="empty-symbol">▤</div><strong>Você ainda não protocolou uma petição.</strong><p>O registro será associado à sua turma e encaminhado ao departamento do curso.</p><a class="button button-primary" th:href="@{/peticoes/nova}">Protocolar agora</a></div>
+                <div class="table-scroll" th:if="${!#lists.isEmpty(petitions)}">
+                    <table class="data-table" id="petitions-table">
+                        <thead><tr><th>Protocolo</th><th>Data da solicitação</th><th>Horários/aulas</th><th>Departamento(s)</th><th>Status</th><th>Ações</th></tr></thead>
+                        <tbody>
+                        <tr th:each="petition : ${petitions}">
+                            <td><strong class="protocol-text" th:text="${petition.protocol}">PET-2026</strong><small th:text="${petition.className + ' · ' + petition.course.label}">Turma</small></td>
+                            <td th:text="${#temporals.format(petition.requestedDate, 'dd/MM/yyyy')}">05/11/2026</td>
+                            <td th:text="${petition.firstPeriod + 'º ao ' + petition.lastPeriod + 'º horário'}">2º ao 4º</td>
+                            <td><span class="department-pills" th:each="entry : ${petition.departmentEntries}" th:text="${entry.department}">DCOM</span></td>
+                            <td><span th:replace="~{fragments/layout :: statusBadge(${petition.status})}"></span></td>
+                            <td><a class="table-action" th:href="@{/peticoes/{id}(id=${petition.id})}">Abrir →</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <footer class="page-footer"><span><strong>LiberaCampus IFMT</strong> · Minhas petições</span><span>Dados persistidos no banco da aplicação</span></footer>
+        </div>
+    </main>
+</div>
+<div class="sidebar-scrim" data-sidebar-scrim></div>
+<script th:src="@{/webjars/jquery/3.7.1/jquery.min.js}"></script><script th:src="@{/webjars/jquery-ui/1.14.2/jquery-ui.min.js}"></script><script th:src="@{/js/app.js}"></script>
+</body>
+</html>

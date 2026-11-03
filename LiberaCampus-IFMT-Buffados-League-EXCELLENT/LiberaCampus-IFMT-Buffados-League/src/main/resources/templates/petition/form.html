@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${editing == true} ? 'Editar petição · LiberaCampus' : 'Nova petição · LiberaCampus'">Nova petição</title>
+    <link rel="stylesheet" th:href="@{/webjars/jquery-ui/1.14.2/jquery-ui.min.css}"><link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{fragments/layout :: sidebar('new', ${account})}"></div>
+    <main class="main-area">
+        <div th:replace="~{fragments/layout :: topbar('Nova petição', ${account})}"></div>
+        <div class="page-content page-content-narrow">
+            <div class="page-intro">
+                <a class="back-link" th:href="@{/peticoes}">← Voltar às minhas petições</a>
+                <span class="eyebrow">PROTOCOLO DE LIBERAÇÃO DE TURMA</span>
+                <h1 th:text="${editing == true} ? 'Atualize sua petição.' : 'Vamos iniciar sua petição.'">Vamos iniciar sua petição.</h1>
+                <p>Preencha os dados da solicitação. O sistema encaminhará o protocolo ao departamento do seu curso e, quando indicado, também ao DABC.</p>
+            </div>
+            <div th:replace="~{fragments/layout :: flashMessages}"></div>
+            <div class="flash flash-error" th:if="${formError}" th:text="${formError}"></div>
+            <form th:action="${editing == true} ? @{/peticoes/{id}/editar(id=${petitionId})} : @{/peticoes}"
+                  th:object="${form}" method="post" class="petition-form" data-petition-form>
+                <section class="form-section">
+                    <div class="form-section-heading"><span class="step-number">01</span><div><h2>Identificação da turma</h2><p>Os dados abaixo são recuperados do seu cadastro e não podem ser alterados nesta petição.</p></div></div>
+                    <div class="readonly-grid">
+                        <div class="readonly-field"><small>Solicitante</small><strong th:text="${account.fullName}">Estudante</strong></div>
+                        <div class="readonly-field"><small>Matrícula</small><strong th:text="${account.matricula}">202600001</strong></div>
+                        <div class="readonly-field"><small>Curso técnico</small><strong th:text="${account.course.label}">Técnico em Informática</strong></div>
+                        <div class="readonly-field"><small>Turma</small><strong th:text="${account.className}">3º C</strong></div>
+                    </div>
+                    <div class="route-preview">
+                        <div class="route-preview-icon">↗</div>
+                        <div><small>DEPARTAMENTO DE ENCAMINHAMENTO AUTOMÁTICO</small><strong th:text="${account.course.department.name() + ' · ' + account.course.department.getName()}">DCOM · Departamento de Computação</strong><span>Definido a partir do curso informado no cadastro.</span></div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-heading"><span class="step-number">02</span><div><h2>Quando ocorrerá a liberação?</h2><p>Informe o dia e o intervalo de horários/aulas que serão afetados.</p></div></div>
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label for="requestedDate">Data pretendida</label>
+                            <div class="input-with-icon"><input id="requestedDate" th:field="*{requestedDate}" type="text" class="js-datepicker" autocomplete="off" placeholder="dd/mm/aaaa" required><span>▦</span></div>
+                            <small class="field-error" th:errors="*{requestedDate}"></small>
+                        </div>
+                        <div class="field-group">
+                            <label for="expectedStudents">Quantidade estimada de estudantes</label>
+                            <input id="expectedStudents" th:field="*{expectedStudents}" type="number" min="1" max="100" required placeholder="Ex.: 32">
+                            <small class="field-error" th:errors="*{expectedStudents}"></small>
+                        </div>
+                        <div class="field-group">
+                            <label for="firstPeriod">Primeiro horário/aula</label>
+                            <select id="firstPeriod" th:field="*{firstPeriod}" required>
+                                <option value="">Selecione</option>
+                                <option th:each="number : ${#numbers.sequence(1, 12)}" th:value="${number}" th:text="${number} + 'º horário'"></option>
+                            </select>
+                            <small class="field-error" th:errors="*{firstPeriod}"></small>
+                        </div>
+                        <div class="field-group">
+                            <label for="lastPeriod">Último horário/aula</label>
+                            <select id="lastPeriod" th:field="*{lastPeriod}" required>
+                                <option value="">Selecione</option>
+                                <option th:each="number : ${#numbers.sequence(1, 12)}" th:value="${number}" th:text="${number} + 'º horário'"></option>
+                            </select>
+                            <small class="field-error" th:errors="*{lastPeriod}"></small>
+                            <small class="field-note" data-period-hint>O intervalo será conferido antes do protocolo.</small>
+                        </div>
+                        <div class="field-group field-span-2">
+                            <label for="affectedSubjects">Disciplinas ou atividades diretamente afetadas</label>
+                            <input id="affectedSubjects" th:field="*{affectedSubjects}" type="text" maxlength="500" class="js-subject-autocomplete" placeholder="Ex.: Programação Web, Matemática, Língua Portuguesa">
+                            <small class="field-note">Separe as disciplinas por vírgula. A lista ajuda os responsáveis a identificar as áreas envolvidas.</small>
+                            <small class="field-error" th:errors="*{affectedSubjects}"></small>
+                        </div>
+                    </div>
+                    <div class="timetable-callout"><span class="timetable-icon">▦</span><div><strong>Confira o quadro de horários oficial.</strong><p>Consulte a turma, os professores e as salas no EduPage antes de enviar a solicitação.</p></div><a href="https://ifmtcba.edupage.org/timetable/" target="_blank" rel="noopener noreferrer">Abrir EduPage ↗</a></div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-heading"><span class="step-number">03</span><div><h2>Representação e encaminhamento</h2><p>Identifique sua condição em relação à turma e as áreas que também precisam se manifestar.</p></div></div>
+                    <div class="field-group">
+                        <label for="representativeRole">Qual é sua condição na turma?</label>
+                        <select id="representativeRole" th:field="*{representativeRole}" required>
+                            <option value="">Selecione uma opção</option>
+                            <option th:each="role : ${representativeRoles}" th:value="${role}" th:text="${role.label}"></option>
+                        </select>
+                        <small class="field-error" th:errors="*{representativeRole}"></small>
+                        <small class="field-note">Líder, vice-líder ou estudante. A petição continua sujeita à análise administrativa em qualquer caso.</small>
+                    </div>
+                    <label class="department-option" for="includeDabc">
+                        <input id="includeDabc" th:field="*{includeDabc}" type="checkbox">
+                        <span class="department-option-check">✓</span>
+                        <span><strong>Incluir o DABC na tramitação</strong><small>A solicitação também afeta aulas de disciplinas da Base Comum, como Matemática, Português, História, Física ou outras.</small></span>
+                        <span class="department-code">DABC</span>
+                    </label>
+                    <div class="route-summary"><span class="route-summary-icon">⌁</span><div><strong>Encaminhamento previsto</strong><p data-routing-summary>O departamento do curso será incluído automaticamente. O DABC será adicionado quando a opção acima estiver marcada.</p></div></div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-heading"><span class="step-number">04</span><div><h2>Justificativa da petição</h2><p>Explique o que será realizado, por que a liberação é necessária e qual é o resultado esperado.</p></div></div>
+                    <div class="field-group">
+                        <label for="reason">Motivo e descrição da atividade</label>
+                        <textarea id="reason" th:field="*{reason}" rows="6" maxlength="1800" minlength="20" required placeholder="Descreva a atividade, sua finalidade pedagógica, os responsáveis, o local previsto e por que a liberação da turma é necessária."></textarea>
+                        <div class="textarea-footer"><small class="field-error" th:errors="*{reason}"></small><small class="field-note"><span data-char-count>0</span>/1.800 caracteres</small></div>
+                    </div>
+                </section>
+
+                <section class="form-submit-panel">
+                    <div class="submit-note"><span class="submit-lock">⌑</span><div><strong>O que acontece após o envio?</strong><p>A petição recebe protocolo, fica registrada no sistema e entra na fila dos departamentos responsáveis. Somente administradores autorizados podem iniciar a análise e registrar a aprovação ou o indeferimento.</p></div></div>
+                    <div class="form-submit-actions"><a class="button button-quiet" th:href="@{/peticoes}">Cancelar</a><button class="button button-primary" type="submit" data-submit-petition th:text="${editing == true} ? 'Salvar alterações →' : 'Protocolar petição →'">Protocolar petição →</button></div>
+                </section>
+            </form>
+            <footer class="page-footer"><span><strong>LiberaCampus IFMT</strong> · Formulário de petição</span><span>Buffados League · Projeto acadêmico</span></footer>
+        </div>
+    </main>
+</div>
+<div class="sidebar-scrim" data-sidebar-scrim></div>
+<script th:src="@{/webjars/jquery/3.7.1/jquery.min.js}"></script><script th:src="@{/webjars/jquery-ui/1.14.2/jquery-ui.min.js}"></script><script th:src="@{/js/app.js}"></script>
+</body>
+</html>

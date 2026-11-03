@@ -1,0 +1,43 @@
+LIBERACAMPUS IFMT - INSTRUCOES PARA WINDOWS
+===========================================
+
+EXECUTAR COM DOIS CLIQUES
+
+1. Extraia o ZIP COMPLETO para uma pasta local.
+2. Abra a pasta LiberaCampus-IFMT-Buffados-League.
+3. Clique duas vezes em EXECUTAR-LIBERACAMPUS.bat.
+4. Na primeira execucao, o script baixa Apache Maven 3.9.11 e as
+   dependencias do projeto. E necessario ter internet.
+5. Quando aparecer Started LiberaCampusApplication, abra:
+   http://localhost:8080
+6. Mantenha a janela preta aberta enquanto utiliza o site.
+7. Para encerrar, volte a janela e pressione CTRL+C.
+
+NAO E NECESSARIO INSTALAR MAVEN MANUALMENTE.
+E necessario ter JDK 21 ou superior no PATH.
+
+SE HOUVER ERRO
+
+1. Execute DIAGNOSTICO-LIBERACAMPUS.bat.
+2. Envie uma captura da janela completa.
+
+EXECUTAR PELO TERMINAL DO INTELLIJ
+
+Abra a pasta raiz (a mesma que contem pom.xml) e execute:
+   .\mvnw.cmd spring-boot:run
+
+TESTES:
+   .\mvnw.cmd test
+
+GERAR JAR:
+   .\mvnw.cmd clean package
+
+OBSERVACOES
+
+- O arquivo mvnw.cmd instala Maven 3.9.11 no perfil do usuario.
+- A aplicacao e um servidor web local; nao basta executar uma classe
+  auxiliar. O processo deve permanecer ativo no terminal.
+- Para acessar, utilize http://localhost:8080.
+- O aviso do Windows sobre editor desconhecido pode aparecer para
+  scripts .bat/.cmd sem assinatura. Execute somente os arquivos que
+  voce extraiu deste pacote e cuja origem conhece.
